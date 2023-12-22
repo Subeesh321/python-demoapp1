@@ -3,10 +3,10 @@ IMAGE_REG ?= ghcr.io
 IMAGE_REPO ?= benc-uk/python-demoapp
 IMAGE_TAG ?= latest
 
-# Used by `deploy` target, sets Azure webap defaults, override as required
-AZURE_RES_GROUP ?= temp-demoapps
-AZURE_REGION ?= uksouth
-AZURE_SITE_NAME ?= pythonapp-$(shell git rev-parse --short HEAD)
+# Used by `deploy` target, sets GCP webap defaults, override as required
+GCP_RES_GROUP ?= temp-demoapps
+GCP_REGION ?= uksouth
+GCP_SITE_NAME ?= pythonapp-$(shell git rev-parse --short HEAD)
 
 # Used by `test-api` target
 TEST_HOST ?= localhost:5000
@@ -40,17 +40,17 @@ run: venv  ## 🏃 Run the server locally using Python & Flask
 	. $(SRC_DIR)/.venv/bin/activate \
 	&& python src/run.py
 
-deploy:  ## 🚀 Deploy to Azure Web App 
-	az group create --resource-group $(AZURE_RES_GROUP) --location $(AZURE_REGION) -o table
+deploy:  ## 🚀 Deploy to GCP Web App 
+	az group create --resource-group $(GCP_RES_GROUP) --location $(GCP_REGION) -o table
 	az deployment group create --template-file deploy/webapp.bicep \
-		--resource-group $(AZURE_RES_GROUP) \
-		--parameters webappName=$(AZURE_SITE_NAME) \
+		--resource-group $(GCP_RES_GROUP) \
+		--parameters webappName=$(GCP_SITE_NAME) \
 		--parameters webappImage=$(IMAGE_REG)/$(IMAGE_REPO):$(IMAGE_TAG) -o table 
-	@echo "### 🚀 Web app deployed to https://$(AZURE_SITE_NAME).azurewebsites.net/"
+	@echo "### 🚀 Web app deployed to https://$(GCP_SITE_NAME).GCPwebsites.net/"
 
-undeploy:  ## 💀 Remove from Azure 
-	@echo "### WARNING! Going to delete $(AZURE_RES_GROUP) 😲"
-	az group delete -n $(AZURE_RES_GROUP) -o table --no-wait
+undeploy:  ## 💀 Remove from GCP 
+	@echo "### WARNING! Going to delete $(GCP_RES_GROUP) 😲"
+	az group delete -n $(GCP_RES_GROUP) -o table --no-wait
 
 test: venv  ## 🎯 Unit tests for Flask app
 	. $(SRC_DIR)/.venv/bin/activate \
